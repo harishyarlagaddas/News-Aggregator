@@ -1,0 +1,81 @@
+# CrewAI task definitions. Variables in single curly braces are filled from kickoff inputs:
+# date, story_count, stories_json, developing_json, feedback. Avoid other curly braces here.
+
+analyse:
+  agent: analyst
+  description: >
+    Today is {date}. Below are {story_count} top stories as JSON, already ranked and
+    de-duplicated. Each has the headline, per-source summaries, optional full article text
+    (full_text, present only when text_status is full_text), and the allowed links.
+
+    TOP STORIES:
+    {stories_json}
+
+    DEVELOPING STORIES (reported on an earlier day; coverage has since grown):
+    {developing_json}
+
+    For every story produce: rank, headline (rewrite for clarity if needed, max 14 words),
+    what_happened (3-5 sentences: the event, who is involved, the key figures and the
+    relevant background, drawing on full_text when present), why_it_matters (2-3 sentences,
+    business impact), what_to_watch (1-2 sentences), confidence (high when full_text was available, otherwise
+    medium), and links (copied exactly from the input). For developing stories, also produce
+    new_information: what changed, judged from the summaries.
+
+    Rules: use only the supplied material; no outside knowledge, no invented numbers, names,
+    dates or quotes. If the material is thin, say less rather than guess.
+  expected_output: >
+    A JSON object with keys "stories" and "developing", each a list of story objects with
+    the fields described. JSON only, no commentary.
+
+write:
+  agent: writer
+  context: [analyse]
+  description: >
+    Write the briefing body for {date} from the analyst's JSON. Output markdown with exactly
+    these sections, in this order, and nothing else (no title line):
+
+    ## Bottom line
+    Three to five sentences on what matters most today across all stories.
+
+    ## Top stories
+    For each story, in rank order:
+    ### N. Headline
+    **What happened:** a short paragraph of three to five sentences describing the story
+    **Why it matters:** two to three sentences
+    **What to watch:** one to two sentences
+    Sources: [Source name](url) · [Source name](url)
+
+    ## Developing
+    Only if there are developing stories: one bullet each with the headline, the new
+    information in one sentence, and one source link. Omit this section entirely otherwise.
+
+    Rules: neutral tone, no hype, no emojis. Use only links from the analyst JSON, copied
+    exactly. Where confidence is medium, avoid precise figures unless they appear in the
+    summaries. Keep the whole body under 1500 words. If the analyst's material for a story is thin,
+    keep that story shorter rather than padding it.
+  expected_output: >
+    Markdown starting with "## Bottom line", followed by "## Top stories" and optionally
+    "## Developing".
+
+review:
+  agent: reviewer
+  context: [write]
+  description: >
+    Review the draft briefing for {date} against the original source material below.
+
+    SOURCE MATERIAL:
+    {stories_json}
+
+    DEVELOPING SOURCE MATERIAL:
+    {developing_json}
+
+    Check every sentence. Remove or soften any claim not supported by the source material.
+    Remove any link whose URL does not appear in the source material. Ensure the sections
+    and story format match the draft's required structure exactly ("## Bottom line",
+    "## Top stories" with "### N. Headline" entries, optional "## Developing").
+    Fix problems directly.
+
+    Problems an automated check found in a previous attempt (fix them if listed): {feedback}
+  expected_output: >
+    The final corrected markdown briefing body only, starting with "## Bottom line". No
+    notes, no explanations, no code fences.

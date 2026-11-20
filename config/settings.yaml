@@ -1,0 +1,60 @@
+# Pipeline tuning. Environment variables (see .env.example) override deployment-specific values.
+
+fetch:
+  concurrency: 10
+  per_host_concurrency: 2
+  timeout_seconds: 10
+  max_retries: 3
+  lookback_hours: 36          # ignore items published earlier than this
+  max_items_per_source: 60
+  user_agent: "NewsInsightsAggregator/0.1 (+mailto:hari.external1@gmail.com)"
+
+editor:
+  embedding_backend: local    # local (sentence-transformers) | bedrock (Titan)
+  local_model: sentence-transformers/all-MiniLM-L6-v2
+  bedrock_embedding_model: amazon.titan-embed-text-v2:0
+  similarity_threshold: 0.82  # same-day duplicate threshold; tune with a labelled pair set
+  cross_day_threshold: 0.85   # match against stories reported on previous days
+  memory_days: 7              # how long reported stories stay in the FAISS index
+  developing_growth: 1.5      # cluster must grow by this factor (and +2 sources) to resurface
+
+priority:
+  top_n: 8
+  min_score_for_deep_scrape: 0.55
+  recency_half_life_hours: 12
+  weights:
+    coverage: 0.40
+    authority: 0.25
+    recency: 0.20
+    relevance: 0.15
+  coverage_cap: 6             # this many distinct sources counts as full coverage
+  max_chars_per_story: 6000   # truncation budget for full text sent to the LLM
+  use_browser_fallback: true  # Playwright for JS-rendered pages
+  watchlist:                  # topics that boost relevance
+    - interest rates, inflation and central bank policy
+    - artificial intelligence industry and regulation
+    - mergers, acquisitions and major funding rounds
+    - semiconductors and supply chains
+    - big tech earnings and antitrust
+    - cybersecurity breaches affecting companies
+
+dedupe:                       # reasoning-model check for same-event stories the embeddings missed
+  enabled: true
+  model: bedrock/google.gemma-3-27b-it   # largest Gemma on Bedrock; must be enabled in Bedrock
+  thinking_budget_tokens: 0    # Gemma isn't a reasoning model; 4000+ would just cost an extra retry
+  max_candidates: 30          # top-ranked stories reviewed per run
+  max_group_size: 5           # larger groups are ignored as likely topic-level over-merges
+
+writer:
+  llm_model: bedrock/us.meta.llama4-scout-17b-instruct-v1:0
+  analyst_model: bedrock/us.meta.llama4-scout-17b-instruct-v1:0
+  temperature: 0.2
+  max_theme_items: 20
+  min_words: 150
+  max_words: 2500
+
+email:
+  subject_template: "Daily Briefing: {date}"
+  from_address: harish.yarlagaddas@gmail.com
+  to_addresses:
+    - harish.yarlagaddas@gmail.com
