@@ -1,30 +1,5 @@
-# 📰 News & Insights Aggregator
+# 📰 AI-Powered Business & Technology News & Insights Aggregator
 
-### AI-Powered Business & Technology Intelligence Briefings
-
-```{=html}
-<p align="center">
-```
-`<strong>`{=html}From thousands of news articles to one intelligent
-daily briefing.`</strong>`{=html}
-```{=html}
-</p>
-```
-```{=html}
-<p align="center">
-```
-`<img src="https://img.shields.io/badge/Python-3.11%2B-blue?logo=python" />`{=html}
-`<img src="https://img.shields.io/badge/AI-CrewAI-orange" />`{=html}
-`<img src="https://img.shields.io/badge/Orchestration-LangGraph-green" />`{=html}
-`<img src="https://img.shields.io/badge/LLM-Amazon%20Bedrock-FF9900?logo=amazonaws" />`{=html}
-`<img src="https://img.shields.io/badge/Embeddings-FAISS-blueviolet" />`{=html}
-`<img src="https://img.shields.io/badge/Infrastructure-Terraform-7B42BC?logo=terraform" />`{=html}
-`<img src="https://img.shields.io/badge/Runtime-AWS%20ECS%20Fargate-FF9900?logo=amazonaws" />`{=html}
-```{=html}
-</p>
-```
-
-------------------------------------------------------------------------
 
 ## 🎯 Overview
 
